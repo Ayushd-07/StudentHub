@@ -1,3 +1,17 @@
+import { db, storage } from "./firebase.js";
+
+import {
+  collection,
+  addDoc,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
 // Login functionality
 let activeDeleteDialog = null;
 document.addEventListener('DOMContentLoaded', function() {
@@ -263,19 +277,107 @@ passwordInput.style.webkitTextSecurity =
 
   window.showFeature = showFeature;
   window.closeFeaturePage = closeFeaturePage;
-  window.scrollToSection = function(section) {
-    const map = {
-      home: 'home',
-      features: 'features',
-      upload: 'upload',
-      download: 'download'
-    };
-    const targetId = map[section];
-    const target = document.getElementById(targetId);
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // ENTER KEY SUPPORT FOR INPUT BOXES
+
+// Login form enter
+usernameInput.addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    loginForm.dispatchEvent(new Event('submit'));
+  }
+});
+
+emailInput.addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    loginForm.dispatchEvent(new Event('submit'));
+  }
+});
+
+passwordInput.addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    loginForm.dispatchEvent(new Event('submit'));
+  }
+});
+
+// Search file enter
+const downloadCodeInput = document.getElementById('downloadCode');
+
+if (downloadCodeInput) {
+  downloadCodeInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      searchFile();
     }
-  };
+  });
+}
+
+// Upload section enter
+const subjectInput = document.getElementById('subject');
+const filePasswordBox = document.getElementById('filePassword');
+
+if (subjectInput) {
+  subjectInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      uploadFile();
+    }
+  });
+}
+
+if (filePasswordBox) {
+  filePasswordBox.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      uploadFile();
+    }
+  });
+}
+
+// Attendance calculator enter
+const totalClasses = document.getElementById('totalClasses');
+const attendedClasses = document.getElementById('attendedClasses');
+const targetAttendance = document.getElementById('targetAttendance');
+
+[totalClasses, attendedClasses, targetAttendance].forEach(input => {
+
+  if (input) {
+
+    input.addEventListener('keypress', function(e) {
+
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        calculateAttendance();
+      }
+
+    });
+
+  }
+
+});
+
+// CGPA calculator enter
+const subjectCount = document.getElementById('subjectCount');
+const internalMarks = document.getElementById('internalMarks');
+const externalMarks = document.getElementById('externalMarks');
+
+[subjectCount, internalMarks, externalMarks].forEach(input => {
+
+  if (input) {
+
+    input.addEventListener('keypress', function(e) {
+
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        calculateCgpa();
+      }
+
+    });
+
+  }
+
+});
 
   // Profile dropdown toggle
   profileBtn.addEventListener('click', function(e) {
@@ -666,11 +768,18 @@ async function uploadFile() {
       uploader: localStorage.getItem('userEmail')
     };
 
-    await saveFileBlob(code, finalBlob);
+    // Upload file to Firebase Storage
+const storageRef = ref(storage, `files/${code}_${finalFileName}`);
 
-    let uploadedFiles = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
-    uploadedFiles.push(fileData);
-    localStorage.setItem('uploadedFiles', JSON.stringify(uploadedFiles));
+await uploadBytes(storageRef, finalBlob);
+
+const downloadURL = await getDownloadURL(storageRef);
+
+// Save file info to Firestore
+await addDoc(collection(db, "files"), {
+  ...fileData,
+  downloadURL: downloadURL
+});
 
     uploadBtn.disabled = false;
     btnText.style.opacity = '1';
@@ -791,6 +900,39 @@ function formatFileSize(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
+function getFileType(fileName) {
+  const ext = fileName.split('.').pop().toLowerCase();
+  return ext;
+}
+
+function getFilePreview(fileType) {
+  const typeMap = {
+    'pdf': { icon: '📕', name: 'PDF Document', description: 'Portable Document Format' },
+    'doc': { icon: '📘', name: 'Word Document', description: 'Microsoft Word (.doc)' },
+    'docx': { icon: '📘', name: 'Word Document', description: 'Microsoft Word (.docx)' },
+    'xls': { icon: '📗', name: 'Excel Spreadsheet', description: 'Microsoft Excel (.xls)' },
+    'xlsx': { icon: '📗', name: 'Excel Spreadsheet', description: 'Microsoft Excel (.xlsx)' },
+    'ppt': { icon: '🎯', name: 'PowerPoint', description: 'Microsoft PowerPoint (.ppt)' },
+    'pptx': { icon: '🎯', name: 'PowerPoint', description: 'Microsoft PowerPoint (.pptx)' },
+    'txt': { icon: '📄', name: 'Text File', description: 'Plain Text (.txt)' },
+    'mp4': { icon: '🎬', name: 'Video File', description: 'MPEG-4 Video (.mp4)' },
+    'avi': { icon: '🎬', name: 'Video File', description: 'Audio Video Interleave (.avi)' },
+    'mov': { icon: '🎬', name: 'Video File', description: 'QuickTime Movie (.mov)' },
+    'mp3': { icon: '🎵', name: 'Audio File', description: 'MPEG Audio (.mp3)' },
+    'wav': { icon: '🎵', name: 'Audio File', description: 'Wave Audio (.wav)' },
+    'jpg': { icon: '🖼️', name: 'Image', description: 'JPEG Image (.jpg)' },
+    'jpeg': { icon: '🖼️', name: 'Image', description: 'JPEG Image (.jpeg)' },
+    'png': { icon: '🖼️', name: 'Image', description: 'PNG Image (.png)' },
+    'gif': { icon: '🖼️', name: 'Image', description: 'GIF Image (.gif)' },
+    'zip': { icon: '📦', name: 'Compressed Archive', description: 'ZIP Archive (.zip)' },
+    'rar': { icon: '📦', name: 'Compressed Archive', description: 'RAR Archive (.rar)' },
+    'json': { icon: '⚙️', name: 'JSON File', description: 'JavaScript Object Notation (.json)' },
+    'csv': { icon: '📊', name: 'CSV Data', description: 'Comma-Separated Values (.csv)' }
+  };
+  
+  return typeMap[fileType] || { icon: '📎', name: fileType.toUpperCase(), description: `${fileType.toUpperCase()} File` };
+}
+
 async function downloadFile(code) {
   const uploadedFiles = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
   const fileIndex = uploadedFiles.findIndex(f => f.code === code);
@@ -894,15 +1036,14 @@ function copyToClipboard(text, button) {
 
 }
 
-function searchFile(autoDownload = false) {
-  const codeInput = document.getElementById('downloadCode');
-  const code = codeInput.value.trim().toUpperCase();
+async function searchFile() {
+  const code = document.getElementById('downloadCode').value.trim().toUpperCase();
+
   const searchBtn = document.querySelector('.search-btn');
   const btnText = searchBtn.querySelector('.btn-text');
   const searchSpinner = document.getElementById('searchSpinner');
   const searchResult = document.getElementById('searchResult');
 
-  // Reset result
   searchResult.innerHTML = '';
   searchResult.className = '';
 
@@ -911,59 +1052,88 @@ function searchFile(autoDownload = false) {
     return;
   }
 
-  // Show loading state
   searchBtn.disabled = true;
   btnText.style.opacity = '0';
   searchSpinner.style.display = 'block';
 
-  // Simulate search process
-  setTimeout(() => {
-    const uploadedFiles = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
-    // Search by code - any user can download if they have the code
-    const file = uploadedFiles.find(f => f.code.toUpperCase() === code.toUpperCase());
+  try {
 
-    // Hide loading state
+    const querySnapshot = await getDocs(collection(db, "files"));
+
+    let foundFile = null;
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+
+      if (data.code.toUpperCase() === code.toUpperCase()) {
+        foundFile = data;
+      }
+    });
+
     searchBtn.disabled = false;
     btnText.style.opacity = '1';
     searchSpinner.style.display = 'none';
 
-    if (file) {
+    if (foundFile) {
+
       const now = new Date();
-      const expiration = new Date(file.expirationDate);
+      const expiration = new Date(foundFile.expirationDate);
       const isExpired = now > expiration;
 
       searchResult.className = 'found';
+
       searchResult.innerHTML = `
         <div class="found-file">
-          <h4>📄 ${file.subject}</h4>
-          <p><strong>File:</strong> ${file.fileName}</p>
-          <p><strong>Size:</strong> ${formatFileSize(file.fileSize)}</p>
-          <p><strong>Uploaded:</strong> ${new Date(file.uploadDate).toLocaleDateString()}</p>
-          <p><strong>Uploaded by:</strong> ${file.uploader}</p>
-          ${file.isMultiFile ? `<p><strong>Contains:</strong> ${file.fileList.length} files</p>` : ''}
-          <p style="color: ${isExpired ? '#ef4444' : '#94a3b8'};">${isExpired ? 'This file has expired' : `Expires: ${expiration.toLocaleString()}`}</p>
-          ${file.password ? '<p style="color: #f59e0b;">🔒 This file is password protected</p>' : ''}
-          ${isExpired ? '<p style="color: #ef4444;">File is no longer available for download</p>' : `<button class="download-found-btn" onclick="initiateDownload('${file.code}')">Download File</button>`}
-          ${file.isMultiFile && !isExpired ? `<button class="preview-btn" onclick="showFileList('${file.code}')">View Files</button>` : ''}
+          <h4>📄 ${foundFile.subject}</h4>
+
+          <p><strong>File:</strong> ${foundFile.fileName}</p>
+
+          <p><strong>Size:</strong> ${formatFileSize(foundFile.fileSize)}</p>
+
+          <p><strong>Uploaded:</strong> ${new Date(foundFile.uploadDate).toLocaleDateString()}</p>
+
+          <p><strong>Uploaded by:</strong> ${foundFile.uploader}</p>
+
+          <p style="color:${isExpired ? '#ef4444' : '#94a3b8'};">
+            ${isExpired ? 'This file has expired' : `Expires: ${expiration.toLocaleString()}`}
+          </p>
+
+          ${
+            isExpired
+            ? '<p style="color:#ef4444;">File expired</p>'
+            : `<a href="${foundFile.downloadURL}" download target="_blank">
+                 <button class="download-found-btn">
+                   Download File
+                 </button>
+               </a>`
+          }
         </div>
       `;
 
-      if (!isExpired && autoDownload) {
-        if (file.password) {
-          initiateDownload(file.code);
-        } else {
-          downloadFile(file.code);
-        }
-      }
     } else {
-      showSearchResult('No file found with this code. Please check and try again.', 'not-found');
+
+      showSearchResult(
+        'No file found with this code. Please check and try again.',
+        'not-found'
+      );
+
     }
 
-    // Reset input
-    if (!autoDownload) {
-      document.getElementById('downloadCode').value = '';
-    }
-  }, 1500);
+    document.getElementById('downloadCode').value = '';
+
+  } catch (error) {
+
+    searchBtn.disabled = false;
+    btnText.style.opacity = '1';
+    searchSpinner.style.display = 'none';
+
+    console.error(error);
+
+    showSearchResult(
+      'Error searching file',
+      'not-found'
+    );
+  }
 }
 
 function showSearchResult(message, type) {
