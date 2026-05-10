@@ -1972,7 +1972,7 @@ function verifyPassword() {
   const errorDiv = document.getElementById('passwordError');
   const password = passwordInput.value.trim();
 
-  if (!password) {
+  if (!password) {  
     showPasswordError('Please enter a password');
     return;
   }
