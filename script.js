@@ -12,6 +12,12 @@ import {
   getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
+document.querySelector('.login-section').style.display = 'none';
+document.getElementById('profileSection').style.display = 'flex';
+
+document.querySelector('.login-section').style.display = 'block';
+document.getElementById('profileSection').style.display = 'none';
+
 // Login functionality
 let activeDeleteDialog = null;
 document.addEventListener('DOMContentLoaded', function() {
@@ -30,7 +36,65 @@ document.addEventListener('DOMContentLoaded', function() {
   const passwordError = document.getElementById('passwordError');
   const usernameInput = document.getElementById('username');
   const usernameError = document.getElementById('usernameError');
-  const loginBtn = document.querySelector('.login-btn');
+  // LOGIN BUTTON FIX
+document.addEventListener('DOMContentLoaded', function () {
+
+  const loginBtn = document.getElementById('loginBtn');
+
+  if (loginBtn) {
+    loginBtn.addEventListener('click', function () {
+
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+
+      // Validation
+      if (!email || !password) {
+        alert('Please enter email and password');
+        return;
+      }
+
+      // Get users
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+
+      // Find matching user
+      const user = users.find(u =>
+        u.email === email &&
+        u.password === password
+      );
+
+      if (user) {
+
+        // Save logged in user
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userEmail', user.email);
+        localStorage.setItem('userName', user.name || 'User');
+
+        // Hide login page
+        const authSection = document.getElementById('authSection');
+        if (authSection) {
+          authSection.style.display = 'none';
+        }
+
+        // Show homepage
+        const mainWebsite = document.getElementById('mainWebsite');
+        if (mainWebsite) {
+          mainWebsite.style.display = 'block';
+        }
+
+        // Update profile name if exists
+        const profileName = document.getElementById('profileName');
+        if (profileName) {
+          profileName.textContent = user.name || 'User';
+        }
+
+      } else {
+        alert('Invalid email or password');
+      }
+
+    });
+  }
+
+});
   const btnText = document.querySelector('.btn-text');
   const loadingSpinner = document.getElementById('loadingSpinner');
 
@@ -2240,3 +2304,64 @@ function getFileIcon(fileName) {
   };
   return iconMap[extension] || '📄';
 }
+
+
+// AUTO LOGIN CHECK
+window.addEventListener('load', function () {
+
+  const isLoggedIn = localStorage.getItem('isLoggedIn');
+
+  if (isLoggedIn === 'true') {
+
+    const authSection = document.getElementById('authSection');
+    if (authSection) {
+      authSection.style.display = 'none';
+    }
+
+    const mainWebsite = document.getElementById('mainWebsite');
+    if (mainWebsite) {
+      mainWebsite.style.display = 'block';
+    }
+
+  } else {
+
+    const authSection = document.getElementById('authSection');
+    if (authSection) {
+      authSection.style.display = 'flex';
+    }
+
+    const mainWebsite = document.getElementById('mainWebsite');
+    if (mainWebsite) {
+      mainWebsite.style.display = 'none';
+    }
+
+  }
+
+});
+
+
+
+// Make functions global for HTML onclick
+window.uploadFile = uploadFile;
+window.searchFile = searchFile;
+window.downloadFile = downloadFile;
+window.closeQrModal = closeQrModal;
+window.copyCode = copyCode;
+window.shareWhatsApp = shareWhatsApp;
+window.copyLink = copyLink;
+window.downloadQR = downloadQR;
+window.closePasswordModal = closePasswordModal;
+window.verifyPassword = verifyPassword;
+window.cancelDownload = cancelDownload;
+window.retryDownload = retryDownload;
+window.showFeature = showFeature;
+window.closeFeaturePage = closeFeaturePage;
+window.calculateAttendance = calculateAttendance;
+window.calculateCgpa = calculateCgpa;
+window.changeUsername = changeUsername;
+window.showFavorites = showFavorites;
+window.showStorageInfo = showStorageInfo;
+window.showAbout = showAbout;
+window.scrollToSection = scrollToSection;
+window.forgotPassword = forgotPassword;
+window.closeFileListModal = closeFileListModal;
