@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudentHub</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <div class="container navbar">
+
+    <h1 class="logo">StudentHub</h1>
+
+    <div class="nav-right">
+      <div class="nav-links">
+        <a href="#home" onclick="scrollToSection('home')">Home</a>
+        <a href="#features" onclick="scrollToSection('features')">Features</a>
+        <a href="#upload" onclick="scrollToSection('upload')">Upload</a>
+        <a href="#download" onclick="scrollToSection('download')">Download</a>
+      </div>
+
+      <div class="profile-section" id="profileSection" style="display: none;">
+  <div class="profile-dropdown">
+
+    <button class="profile-btn" id="profileBtn">
+      <span class="profile-icon">👤</span>
+      <span class="profile-name" id="profileName">User</span>
+      <span class="dropdown-arrow">▼</span>
+    </button>
+
+    <div class="dropdown-menu" id="dropdownMenu">
+
+
+  <a class="dropdown-item" onclick="changeUsername()" style="cursor:pointer;">
+    👤 Change Username
+  </a>
+
+  <a class="dropdown-item" onclick="showFavorites()" style="cursor:pointer;">
+    ❤️ Favorite Files
+  </a>
+
+
+  <a class="dropdown-item" onclick="showStorageInfo()" style="cursor:pointer;">
+    💾 Storage Info
+  </a>
+
+  <a class="dropdown-item" onclick="showAbout()" style="cursor:pointer;">
+    ℹ️ About
+  </a>
+
+  <div class="dropdown-divider"></div>
+
+  <a class="dropdown-item logout-btn" id="logoutBtn" style="cursor:pointer;">
+    Logout
+  </a>
+
+</div>
+  </div>
+</div>
+    </div>
+
+  </div>
+
+  <!-- Hero -->
+  <div class="container hero" id="home">
+
+    <div class="hero-text">
+
+      <h1>Student Notes Sharing Platform</h1>
+
+      <p>
+        Attendance calculator, CGPA calculator,
+        study timer and file sharing platform.
+      </p>
+
+    </div>
+
+  </div>
+
+  <!-- Login -->
+  <div class="container login-section">
+
+    <div class="section-title">
+      <h2>Log<span class="highlight">in</span></h2>
+    </div>
+
+    <div class="login-box">
+
+      <form id="loginForm">
+
+        <div class="input-group">
+          <label for="username"> <i class="fa-regular fa-user" style="color: rgb(6, 182, 212);"></i> Username</label>
+          <input type="text" id="username" placeholder="Enter your username" required>
+          <span class="error-message" id="usernameError"></span>
+        </div>
+
+        <div class="input-group">
+          <label for="email"> <i class="fa-regular fa-envelope" style="color: rgb(6, 182, 212);"></i> Email Address</label>
+          <input type="email" id="email" placeholder="Enter your email" required>
+          <span class="error-message" id="emailError"></span>
+        </div>
+
+        <div class="input-group">
+          <label for="password"><i class="fa-solid fa-key" style="color: rgb(6, 182, 212);"></i> Password</label>
+          <div class="password-input-container">
+            <input type="password" id="password" placeholder="Enter your password" required>
+            <button type="button" class="password-toggle" id="passwordToggle">
+              <span class="eye-icon" id="eyeIcon">👁️</span>
+            </button>
+          </div>
+          <span class="error-message" id="passwordError"></span>
+        </div>
+
+        <div class="form-options">
+
+
+  <a href="#" class="forgot-password" onclick="forgotPassword()">
+    Forgot Password?
+  </a>
+
+</div>
+
+        <button type="submit" class="login-btn">
+          <span class="btn-text">➜] Login</span>
+          <div class="loading-spinner" id="loadingSpinner"></div>
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+  <!-- Features -->
+  <div class="container feature-section" id="features">
+
+    <div class="section-title">
+      <h2>Main Features</h2>
+    </div>
+
+    <div class="cards">
+
+      <div class="card" onclick="showFeature('attendance')">
+        <h3>📊 Attendance Calculator</h3>
+        <p>Track attendance easily.</p>
+      </div>
+
+      <div class="card" onclick="showFeature('cgpa')">
+        <h3>🎓 CGPA Calculator</h3>
+        <p>Calculate CGPA instantly.</p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Feature Pages -->
+  <div class="container feature-pages" id="featurePages" style="display: none;">
+    <div class="feature-page" id="attendancePage">
+      <div class="page-header">
+        <h2>Attendance Calculator</h2>
+        <button class="page-back-btn" onclick="closeFeaturePage()">← Back</button>
+      </div>
+      <div class="page-content">
+        <p>Enter your current classes and target attendance percentage.</p>
+        <div class="input-group">
+          <label for="totalClasses">Total Classes Held</label>
+          <input type="number" id="totalClasses" min="0"/>
+        </div>
+        <div class="input-group">
+          <label for="attendedClasses">Classes Attended</label>
+          <input type="number" id="attendedClasses" min="0"/>
+        </div>
+        <div class="input-group">
+          <label for="targetAttendance">Target Attendance %</label>
+          <input type="number" id="targetAttendance" min="0" max="100" value="75"/>
+        </div>
+        <button class="feature-action-btn" onclick="calculateAttendance()">Calculate Attendance</button>
+        <div class="feature-result" id="attendanceResult"></div>
+      </div>
+    </div>
+
+    <div class="feature-page" id="cgpaPage">
+      <div class="page-header">
+        <h2>CGPA Calculator</h2>
+        <button class="page-back-btn" onclick="closeFeaturePage()">← Back</button>
+      </div>
+      <div class="page-content">
+        <p>Enter your total internal and external marks, plus number of subjects.</p>
+        <div class="input-group">
+          <label for="subjectCount">Number of Subjects</label>
+          <input type="number" id="subjectCount" min="1" placeholder="e.g. 5" />
+        </div>
+        <div class="input-group">
+          <label for="internalMarks">Total Internal Marks Obtained</label>
+          <input type="number" id="internalMarks" min="0" placeholder="e.g. 100" />
+        </div>
+        <div class="input-group">
+          <label for="externalMarks">Total External Marks Obtained</label>
+          <input type="number" id="externalMarks" min="0" placeholder="e.g. 200" />
+        </div>
+        <button class="feature-action-btn" onclick="calculateCgpa()">Calculate CGPA</button>
+        <div class="feature-result" id="cgpaResult"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Upload -->
+  <div class="container upload-section" id="upload">
+
+    <div class="section-title">
+      <h2>Upload Notes & Generate Code</h2>
+    </div>
+
+    <div class="upload-box">
+
+      <div class="input-group">
+        <label for="subject">Subject Name</label>
+        <input type="text" id="subject" placeholder="Enter subject name" required>
+      </div>
+
+      <div class="input-group">
+        <label for="file">Select PDF or PPT File</label>
+        <label for="file" class="file-input-label" id="fileLabel">
+          <strong>📁 Click to upload</strong> or drag and drop
+        </label>
+        <input type="file" id="file" required>
+        <div class="file-name-display" id="fileName"></div>
+        <small class="file-info">
+Supported formats: PDF, PPT, PPTX, DOC, DOCX, ZIP, JPG, PNG, MP4, XLSX etc. (Max: 10MB)
+</small>
+      </div>
+
+      <button type="button" onclick="uploadFile()" class="upload-btn">
+        <span class="btn-text">Upload File</span>
+        <div class="loading-spinner" id="uploadSpinner"></div>
+      </button>
+
+      <div id="uploadStatus"></div>
+
+    </div>
+
+    <!-- Uploaded Files Display -->
+    <div class="uploaded-files" id="uploadedFiles">
+      <h3>Your Uploaded Files</h3>
+      <div id="filesList"></div>
+    </div>
+
+  </div>
+
+  <!-- Download -->
+  <div class="container download-section" id="download">
+
+    <div class="section-title">
+      <h2>Download Using Code</h2>
+    </div>
+
+    <div class="download-box">
+
+      <div class="input-group">
+        <label for="downloadCode" style="padding-bottom: 20px;">Enter Download Code</label>
+        <input type="text" id="downloadCode" placeholder="Enter 6-character code" maxlength="6" required>
+      </div>
+
+      <button type="button" onclick="searchFile()" class="search-btn">
+        <span class="btn-text">Search File</span>
+        <div class="loading-spinner" id="searchSpinner"></div>
+      </button>
+
+      <div id="searchResult"></div>
+
+    </div>
+
+  </div>
+
+  
+
+  <div class="about-content">
+    
+    <h2>About StudentHub</h2>
+
+  <p>
+    StudentHub is a smart platform specially designed for students to
+    upload, share, download, and manage study materials easily.
+  </p>
+
+  <div class="about-features">
+
+    <div class="about-feature">
+      📚 Upload Notes, PDFs, PPT & DOC Files
+    </div>
+
+    <div class="about-feature">
+      🔐 Secure Login & Personal Profile System
+    </div>
+
+    <div class="about-feature">
+      📥 Download Files Using Share Code
+    </div>
+
+    <div class="about-feature">
+      ❤️ Save Favorite Study Materials
+    </div>
+
+    <div class="about-feature">
+      📊 Attendance & CGPA Calculator
+    </div>
+
+    <div class="about-feature">
+      ☁️ Fast & Easy File Sharing Experience
+    </div>
+
+  </div>
+
+  <p class="about-footer">
+    Made for students to learn smarter every day.
+  </p>
+
+
+  <!-- Footer -->
+<div class="footer">
+  
+</div>
+
+  <script src="script.js"></script>
+
+</div>
+
+</body>
+
+</html>
